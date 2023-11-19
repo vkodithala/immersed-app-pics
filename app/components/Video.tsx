@@ -9,14 +9,21 @@ import { Message } from 'ai'
 
 export default function Video() {
     const initialized = useRef(false)
+    console.log("test")
+ 
 
     const { messages, input, handleInputChange, handleSubmit, append } = useChat({
         api: '/api/story',
         initialMessages: getInitial(),
         onResponse(response) {
             console.log(response)
-        }
+        },
+        onFinish(message) {
+            setImagePrompt(message.content + ": from the excerpt, generate a photorealistic/Humanistic image that matches the descriptions closly associated with the Harry Potter Story. Make sure there is no text in the image. I REPEAT make it as Photorealistic as possible and make the image look like a movie cover and cinematic. Make charachters look as close as possible to Harry Potter Charachters and Settings.");
+        },
     });
+
+
 
     const getStory = () => {
         console.log(messages)
@@ -33,6 +40,32 @@ export default function Video() {
             }
         }
     }
+
+    const [imagePrompt, setImagePrompt] = useState(getStory() + ": from the excerpt, generate a photorealistic/Humanistic image that matches the descriptions closly associated with the Harry Potter Story. Make sure there is no text in the image. I REPEAT make it as Photorealistic as possible and make the image look like a movie cover and cinematic. Make charachters look as close as possible to Harry Potter Charachters and Settings.");
+    const [imageUrl, setImageUrl] = useState("");
+    const [videoUrl, setVideoUrl] = useState("/starter.mp4");
+
+    const response = async() => {
+        const result = await fetch("/api/imgen", {
+            method: "POST",
+            body: JSON.stringify({ prompt: imagePrompt })
+        })
+        const resultText = await result.text();
+        setImageUrl(resultText);
+        console.log(imageUrl);
+
+        const result2 = await fetch("/api/video", {
+            method: "POST",
+            body: JSON.stringify({ url: resultText })
+        })
+        const resultText2 = await result2.text();
+        setVideoUrl(resultText2);
+        console.log(videoUrl);
+    }
+
+    useEffect(() => {
+        response()
+    }, [imagePrompt])
 
     const getOptions = () => {
         let lastMessage = messages.filter((message) => message.role === "assistant").at(-1) as Message
@@ -56,10 +89,23 @@ export default function Video() {
             content: option
         })
     }
-
     return (
         <div className="grid place-items-center h-screen">
             <div className="w-3/4">
+                <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{
+                    type: "spring",
+                    stiffness: 260,
+                    damping: 20
+                }}
+                className="my-5"
+                style={{ display: 'inline-block' }}>
+                    <video 
+                    style={{ width: '50%', height: 'auto', display: 'block' }}
+                    className="inline rounded-lg max-w-1/3" autoPlay muted loop src={videoUrl} type="video/mp4" />
+                </motion.div>
                 <p className="mb-2 font-mono font-bold text-3xl underline">IMMERSED</p>
                 <div className="mt-3 rounded-md overflow-y-auto">
                     <p className="font-mono">
@@ -72,7 +118,7 @@ export default function Video() {
                     {
                         getOptions().map((option, index) => {
                             return (
-                                <motion.a onClick={() => { chooseOption(option) }} key={index} whileHover={{ scale: 1.1, backgroundColor: 'lightgray' }} whileTap={{ scale: 0.8 }} className="bg-slate-200 rounded-md p-3">
+                                <motion.a onClick={() => { chooseOption(option) }} key={index} whileHover={{ scale: 1.1, backgroundColor: 'lightgray', cursor: 'pointer' }} whileTap={{ scale: 0.8 }} className="bg-slate-200 rounded-md p-3">
                                     <p className="font-mono font-semibold text-slate-800">{option}</p>
                                 </motion.a>
                             )
@@ -83,4 +129,3 @@ export default function Video() {
         </div>
     )
 }
-

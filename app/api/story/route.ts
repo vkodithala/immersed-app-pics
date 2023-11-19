@@ -8,11 +8,25 @@ import { OpenAI } from 'openai';
 const model = 'gpt-4'
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  baseURL: `https://personal-aiatl2.openai.azure.com/openai/deployments/${model}`,
-  defaultQuery: { 'api-version': '2023-09-15-preview' },
-  defaultHeaders: { 'api-key': process.env.OPENAI_API_KEY }
-})
+  baseURL: `https://oai.hconeai.com/openai/deployments/${model}`,
+  defaultHeaders: {
+    "Helicone-Auth": `Bearer sk-helicone-a5e6uvq-ksteaki-racq5ba-y3sryri`,
+    "Helicone-OpenAI-API-Base": "https://personal-aiatl3.openai.azure.com",
+    "api-key": process.env.OPENAI_API_KEY2,
+  },
+  defaultQuery: { "api-version": "2023-09-15-preview" },
+});
+
+
+const openai2 = new OpenAI({
+  baseURL: `https://oai.hconeai.com/openai/deployments/${model}`,
+  defaultHeaders: {
+    "Helicone-Auth": `Bearer sk-helicone-a5e6uvq-ksteaki-racq5ba-y3sryri`,
+    "Helicone-OpenAI-API-Base": "https://personal-aiatl2.openai.azure.com",
+    "api-key": process.env.OPENAI_API_KEY,
+  },
+  defaultQuery: { "api-version": "2023-09-15-preview" },
+});
  
 // IMPORTANT! Set the runtime to edge
 export const runtime = 'edge'
@@ -22,8 +36,10 @@ export async function POST(req: Request) {
   // Extract the `messages` from the body of the request
   const { messages } = await req.json()
  
+  let client = Math.random() < 0.5 ? openai : openai2;
+
   // Ask OpenAI for a streaming chat completion given the prompt
-  const response = await openai.chat.completions.create({
+  const response = await client.chat.completions.create({
     model: 'gpt-4',
     stream: true,
     messages
