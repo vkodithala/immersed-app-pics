@@ -4,9 +4,14 @@ import { OpenAIStream, StreamingTextResponse } from 'ai'
 import { Configuration } from 'openai-edge'
 import { OpenAI } from 'openai';
 
-// Create an OpenAI API client
+// Create an OpenAI API 
+const model = 'gpt-4'
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
+  baseURL: `https://personal-aiatl2.openai.azure.com/openai/deployments/${model}`,
+  defaultQuery: { 'api-version': '2023-09-15-preview' },
+  defaultHeaders: { 'api-key': process.env.OPENAI_API_KEY }
 })
  
 // IMPORTANT! Set the runtime to edge

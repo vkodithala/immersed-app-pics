@@ -61,7 +61,7 @@ export default function Video() {
         <div className="grid place-items-center h-screen">
             <div className="w-3/4">
                 <p className="mb-2 font-mono font-bold text-3xl underline">IMMERSED</p>
-                <div className="mt-3 rounded-md p-3 overflow-y-auto">
+                <div className="mt-3 rounded-md overflow-y-auto">
                     <p className="font-mono">
                         { getStory() }
                     </p>
